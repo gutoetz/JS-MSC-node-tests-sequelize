@@ -1,28 +1,28 @@
-require("dotenv").config();
+require('dotenv').config();
 
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 
 const jwtConfig = {
-  expiresIn: "7d",
-  algorithm: "HS256",
+  expiresIn: '7d',
+  algorithm: 'HS256',
 };
 
-const secret = process.env.JWT_SECRET || 'secretCode'
+const secret = process.env.JWT_SECRET || 'secretCode';
 
-const generateToken = ({ email, password }) =>
-  jwt.sign({ email, password }, secret, jwtConfig);
+const generateToken = ({ email }) =>
+  jwt.sign({ email }, secret, jwtConfig);
 
 const authenticatToken = async (token) => {
   if (!token) {
-    const error = new Error("missing auth token");
+    const error = new Error('Token not found');
     error.status = 401;
     throw error;
   }
   try {
-    const decryptedData = await jwt.verify(token, JWT_SECRET);
+    const decryptedData = await jwt.verify(token, process.env.JWT_SECRET);
     return decryptedData;
   } catch (err) {
-    const error = new Error("jwt error");
+    const error = new Error('Expired or invalid token');
     error.status = 401;
     throw error;
   }

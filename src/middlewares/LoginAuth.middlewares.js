@@ -1,10 +1,10 @@
-const { User } = require("../models");
+const { User } = require('../models');
 
 const authLogin = async (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({message:"Some required fields are missing"});
+    return res.status(400).json({ message: 'Some required fields are missing' });
   }
 
   const findUser = await User.findOne({
@@ -12,7 +12,7 @@ const authLogin = async (req, res, next) => {
   });
 
   if (!findUser) {
-    return res.status(400).json({message:"Invalid fields"});
+    return res.status(400).json({ message: 'Invalid fields' });
   }
   next();
 };
