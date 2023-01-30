@@ -10,7 +10,7 @@ const authToken = async (req, res, next) => {
             message: 'jwt malformed',
         }));
     }
-    res.locals.user = user;
+    req.user = user;
 
     next();
 } catch (error) {

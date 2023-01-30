@@ -9,8 +9,8 @@ const jwtConfig = {
 
 const secret = process.env.JWT_SECRET || 'secretCode';
 
-const generateToken = ({ email }) =>
-  jwt.sign({ email }, secret, jwtConfig);
+const generateToken = ({ email, id }) =>
+  jwt.sign({ email, id }, secret, jwtConfig);
 
 const authenticatToken = async (token) => {
   if (!token) {
