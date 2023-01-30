@@ -16,4 +16,13 @@ const getAll = async () => {
   return users;
 };
 
-module.exports = { createUser, getAll };
+const getUSerById = async (id) => {
+  const user = await User.findOne({
+    where: { id },
+    attributes: ['id', 'displayName', 'email', 'image'],
+  }) || undefined;
+  console.log(user);
+  return user;
+};
+
+module.exports = { createUser, getAll, getUSerById };

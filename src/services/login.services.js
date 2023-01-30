@@ -1,8 +1,8 @@
-const { generateToken } = require("../utils/JWT");
+const { generateToken } = require('../utils/JWT');
 
-const authLogin = async ({email, password}) => {
-  const token = generateToken({email, password})
-  return token
+const authLogin = async ({ email, password }) => {
+  const token = generateToken({ email, password });
+  return token;
 };
 
 module.exports = { authLogin };
