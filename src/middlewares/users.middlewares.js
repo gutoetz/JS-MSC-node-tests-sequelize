@@ -11,7 +11,7 @@ const userSchema = Joi.object({
   });
 
 const newUserValidate = async (req, res, next) => {
-  const { email, password, displayName, image } = req.body;
+  const { email, password, displayName } = req.body;
 
   const { error } = userSchema.validate({ email, password, displayName });
   if (error) {
