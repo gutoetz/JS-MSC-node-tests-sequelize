@@ -6,8 +6,23 @@ const postSchema = async ({ title, content, categoryIds }) => {
   const validateCategory = categoryIds.map((e) =>
     Category.findOne({ where: { id: e } }));
   const resolvedPromises = await Promise.all(validateCategory);
-  console.log(resolvedPromises);
   if (resolvedPromises.includes(null)) { return new Error('one or more "categoryIds" not found'); }
+};
+
+const changingPostSchema = async ({ content, title, id, userId }) => {
+  if (!content || !title) {
+ return new Error(JSON.stringify({
+    status: 400,
+    message: 'Some required fields are missing',
+  })); 
+} 
+const post = await BlogPost.findOne({ where: { id } });
+if (post.userId !== userId) {
+  return new Error(JSON.stringify({
+    status: 401,
+    message: 'Unauthorized user',
+  }));
+}
 };
 
 const createPost = async ({ title, content, categoryIds, userId }) => {
@@ -24,10 +39,37 @@ const getAllPosts = async () => {
   const allPosts = await BlogPost.findAll({
     include: [
       { model: User, as: 'user', attributes: { exclude: ['password'] } },
-      { model: Category, as: 'categories', through: { attributes: [] }},
+      { model: Category, as: 'categories', through: { attributes: [] } },
     ],
   });
   return allPosts;
 };
 
-module.exports = { createPost, getAllPosts };
+const getPostById = async (id) => {
+  const post = await BlogPost.findOne({
+    where: { id },
+    include: [
+      { model: User, as: 'user', attributes: { exclude: ['password'] } },
+      { model: Category, as: 'categories', through: { attributes: [] } },
+    ],
+  });
+  return post;
+};
+
+const attPost = async ({ content, title, id, userId }) => {
+  const error = await changingPostSchema({ content, title, id, userId });
+  if (error) throw new Error(error.message);
+  const changingPost = await BlogPost.update({ content, title }, { where: { id } });
+  if (changingPost[0]) {
+    const changedPost = await BlogPost.findOne({
+      where: { id },
+      include: [
+        { model: User, as: 'user', attributes: { exlude: ['password'] } },
+        { model: Category, as: 'categories', through: { attributes: [] } },
+      ],
+    });
+    return changedPost;
+  }
+};
+
+module.exports = { createPost, getAllPosts, getPostById, attPost };
