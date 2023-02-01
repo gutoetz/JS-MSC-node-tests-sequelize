@@ -19,6 +19,7 @@ const changingPostSchema = async ({ content, title, id, userId }) => {
 } 
 
 const post = await BlogPost.findOne({ where: { id } });
+if (!post) return new Error(JSON.stringify({ status: 400, message: 'post Not Found' }));
 if (post.userId !== userId) {
   return new Error(JSON.stringify({
     status: 401,
@@ -78,7 +79,8 @@ const getPostById = async (id) => {
 
 const attPost = async ({ content, title, id, userId }) => {
   const error = await changingPostSchema({ content, title, id, userId });
-  if (error) throw new Error(error);
+  console.log('dasdasdasdasssssssssssssssss', error);
+  if (error) throw new Error(error.message);
   const changingPost = await BlogPost.update({ content, title }, { where: { id } });
   if (changingPost[0]) {
     const changedPost = await BlogPost.findOne({

@@ -36,8 +36,8 @@ const attPost = async (req, res) => {
     const mutedPost = await postServices.attPost({ content, title, id, userId });
     res.status(200).json(mutedPost);
   } catch (error) {
-    // const err = JSON.parse(error.message);
-    res.status(400).json({ message: 'err.message' });
+    const err = JSON.parse(error.message);
+    res.status(err.status).json({ message: err.message });
   }
 };
 
