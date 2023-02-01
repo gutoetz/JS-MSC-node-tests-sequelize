@@ -1,3 +1,4 @@
+const { Op } = require('sequelize');
 const { BlogPost, PostCategory, User, Category } = require('../models');
 
 const postSchema = async ({ title, content, categoryIds }) => {
@@ -16,6 +17,7 @@ const changingPostSchema = async ({ content, title, id, userId }) => {
     message: 'Some required fields are missing',
   })); 
 } 
+
 const post = await BlogPost.findOne({ where: { id } });
 if (post.userId !== userId) {
   return new Error(JSON.stringify({
@@ -33,6 +35,24 @@ const createPost = async ({ title, content, categoryIds, userId }) => {
     categoryIds.map((e) => ({ postId: newPost.id, categoryId: e })),
   );
   return newPost;
+};
+
+const deletingSchema = async ({ id, userId }) => {
+  const checkingPost = await BlogPost.findOne({ where: { id } });
+  if (!checkingPost) {
+    const error = {
+      status: 404,
+      message: 'Post does not exist',
+    };
+    return new Error(JSON.stringify(error));
+  }
+  if (checkingPost.userId !== userId) {
+    const error = {
+      status: 401,
+      message: 'Unauthorized user',
+    };
+    return new Error(JSON.stringify(error));
+  }
 };
 
 const getAllPosts = async () => {
@@ -58,7 +78,7 @@ const getPostById = async (id) => {
 
 const attPost = async ({ content, title, id, userId }) => {
   const error = await changingPostSchema({ content, title, id, userId });
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(error);
   const changingPost = await BlogPost.update({ content, title }, { where: { id } });
   if (changingPost[0]) {
     const changedPost = await BlogPost.findOne({
@@ -72,4 +92,30 @@ const attPost = async ({ content, title, id, userId }) => {
   }
 };
 
-module.exports = { createPost, getAllPosts, getPostById, attPost };
+const deletePost = async ({ id, userId }) => {
+  const error = await deletingSchema({ id, userId });
+  if (error) throw new Error(error.message);
+  await BlogPost.destroy({ where: { id } });
+};
+
+const searchQuery = async (q) => {
+  console.log(q);
+  if (!q) return getAllPosts();
+  const searchByTitle = await BlogPost.findAll({
+    where: { title: { [Op.substring]: q } },
+    include: [
+      { model: User, as: 'user', attributes: { exlude: ['password'] } },
+      { model: Category, as: 'categories', through: { attributes: [] } },
+    ],
+  });
+   if (searchByTitle.length > 0) return searchByTitle;
+  const searchByContent = await BlogPost.findAll({
+    where: { content: { [Op.substring]: q } },
+    include: [
+      { model: User, as: 'user', attributes: { exlude: ['password'] } },
+      { model: Category, as: 'categories', through: { attributes: [] } },
+    ],
+  }); return searchByContent;
+};
+
+module.exports = { createPost, getAllPosts, getPostById, attPost, deletePost, searchQuery };

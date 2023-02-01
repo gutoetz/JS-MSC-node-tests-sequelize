@@ -36,9 +36,27 @@ const attPost = async (req, res) => {
     const mutedPost = await postServices.attPost({ content, title, id, userId });
     res.status(200).json(mutedPost);
   } catch (error) {
+    // const err = JSON.parse(error.message);
+    res.status(400).json({ message: 'err.message' });
+  }
+};
+
+const deletePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    await postServices.deletePost({ id, userId });
+    res.status(204).json();
+  } catch (error) {
     const err = JSON.parse(error.message);
     res.status(err.status).json({ message: err.message });
   }
 };
 
-module.exports = { createPost, getAllPosts, getPostById, attPost };
+const searchQuery = async (req, res) => {
+  const { query: { q } } = req;
+  const searchPost = await postServices.searchQuery(q);
+  res.status(200).json(searchPost);
+};
+
+module.exports = { deletePost, createPost, getAllPosts, getPostById, attPost, searchQuery };
